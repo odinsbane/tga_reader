@@ -3,7 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fstream>
-#include <GL/gl.h>
+
+#ifdef __APPLE__
+  #include <OpenGL/gltypes.h>
+  #else
+  #include <GL/gl.h>
+#endif
 namespace TGA{
     struct image{
         int height;

@@ -1,5 +1,10 @@
 #define DEBUG 1
-#include <GL/glew.h>
+#ifndef __APPLE__
+  #include <GL/glew.h>
+#else
+  #define GLFW_INCLUDE_GLCOREARB
+  #define GLFW_NO_GLU
+#endif
 #include "GLFW/glfw3.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +29,11 @@ const int indices[] = {
 
 //simple shader output = input. texture coordinates are the xy, should make 4 copies of texture.
 const std::string vertexStr(
-        "#version 130\n"
+#ifdef __APPLE__
+        "#version 150\n"
+#else
+		"#version 130\n"
+#endif
         "in vec3 pos;\n"
         "out vec2 texCoords;\n"
         "void main(){\n"
@@ -35,7 +44,11 @@ const std::string vertexStr(
 
 //Gets the values from the texture.
 const std::string fragmentStr(
-    "#version 130\n"
+#ifdef __APPLE__
+        "#version 150\n"
+#else
+		"#version 130\n"
+#endif
     "out vec4 outputColor;\n"
     "in vec2 texCoords;\n"
     "uniform sampler2D texSampler;\n"
@@ -56,12 +69,21 @@ int main(int arg_co, char** args){
          *Creating and initlizing a window on mac.
          *
          **/
+        
+         
+        
         GLFWwindow* window;
 
         /* Initialize the library */
         if (!glfwInit())
             return -1;
-
+		#ifdef __APPLE__
+          glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+          glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+          glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+          glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        #endif
+        
         /* Create a windowed mode window and its OpenGL context */
         window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
         if (!window)
@@ -72,7 +94,10 @@ int main(int arg_co, char** args){
 
         /* Make the window's context current */
         glfwMakeContextCurrent(window);
-        glewInit();
+        
+        #ifndef __APPLE__
+          glewInit();
+        #endif
 
         printf("GLSL version %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
         printf("GL Version: %s\n", glGetString(GL_VERSION));
