@@ -19,14 +19,15 @@ namespace TGA{
         image* img = new image;
         img->width = ((unsigned char)header[13]<<8) + (unsigned char)header[12];
         img->height = ((unsigned char)header[15]<<8) + (unsigned char)header[14];
-        
-        int size = 4*img->width*img->height;
+        img->pixel_depth = (unsigned char)header[16];
+        int size = img->pixel_depth/8*img->width*img->height;
         
         char* back = new char[size];
         
         infile.read(back,size);
         
         img->texture = (GLubyte*)back;
+        
         
         return img;
     }

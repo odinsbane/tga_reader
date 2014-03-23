@@ -77,12 +77,17 @@ int main(int arg_co, char** args){
         /* Initialize the library */
         if (!glfwInit())
             return -1;
-		#ifdef __APPLE__
+	#ifdef __APPLE__
           glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
           glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
           glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
           glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        #endif
+	#else
+          //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+          //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+          //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+          //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	#endif
         
         /* Create a windowed mode window and its OpenGL context */
         window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
@@ -112,11 +117,11 @@ int main(int arg_co, char** args){
         if(!shaderStatus(vertexShader)){
             exit(1);
         }
-
         const char* fragmentCStr = fragmentStr.c_str();
         GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
         glShaderSource(fragmentShader, 1, &fragmentCStr, NULL);
         glCompileShader( fragmentShader );
+	
 
         if(!shaderStatus(fragmentShader)){
             exit(1);
@@ -125,7 +130,7 @@ int main(int arg_co, char** args){
         GLuint program = glCreateProgram();
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragmentShader);
-        glLinkProgram(program);
+        glLinkProgram(program);	
 
         if(!programStatus(program)){
             exit(1);
@@ -134,9 +139,8 @@ int main(int arg_co, char** args){
          * Set up the buffers.
         */
         glUseProgram(program);
-
-
-
+	
+	
         GLuint positionBufferObject;
         glGenBuffers(1, &positionBufferObject);
         glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
@@ -149,16 +153,15 @@ int main(int arg_co, char** args){
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*6, indices, GL_STREAM_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
-
         GLuint positionAttribute = glGetAttribLocation(program, "pos");
 
 
-
+	
 
         GLuint vao;
+
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
-
         glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
         glEnableVertexAttribArray(positionAttribute);
         glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -167,22 +170,24 @@ int main(int arg_co, char** args){
 
         glBindVertexArray(0);
         glUseProgram(0);
-	
-	std::string input = args[1];
-	TGA::image* img = TGA::load_texture(input);
-	/*
+
+        std::string input = args[1];
+        TGA::image* img = TGA::load_texture(input);
+        printf("size: ( %d x %d ) bit per pixel: %d\n", img->width, img->height, img->pixel_depth);
+        
+        GLuint pixel_type = img->pixel_depth==32?GL_BGRA:GL_BGR;
+        /*
          * Set up texture buffer
          **/
         glUseProgram(program);
         GLuint texBufferdObject;
         glGenTextures(1, &texBufferdObject);
         glBindTexture(GL_TEXTURE_2D, texBufferdObject);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, img->texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, pixel_type, GL_UNSIGNED_BYTE, img->texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
-
         const int texUnit=0;
         GLuint samplerUniform = glGetUniformLocation(program, "texSampler");
         glUniform1i(samplerUniform, texUnit);

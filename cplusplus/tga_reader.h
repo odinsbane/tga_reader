@@ -13,6 +13,7 @@ namespace TGA{
     struct image{
         int height;
         int width;
+        int pixel_depth;
         GLubyte* texture;
     };
 

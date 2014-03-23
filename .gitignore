@@ -1,0 +1,4 @@
+*.o
+*.tga
+min_texture
+tga_term_check
