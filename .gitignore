@@ -2,3 +2,6 @@
 *.tga
 min_texture
 tga_term_check
+word_texture
+cmd_line_check
+minimum_texture
