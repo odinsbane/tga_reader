@@ -53,7 +53,7 @@ GLuint loadProgram();
 int main(int arg_co, char** args){
         std::string text;
         if(arg_co < 2){
-            text = "test";
+            text = "t";
         } else{
             text = args[1];
         }
@@ -103,21 +103,25 @@ int main(int arg_co, char** args){
     
         GLuint program = loadProgram();
     
-        Word word(text);
-        word.setOrigin(-0.5, -0.5);
-        word.prepareBuffers(program);
+        Word* word =  new Word(text);
+        word->setOrigin(-0.5, -0.5);
+        word->prepareBuffers(program);
         /* Loop until the user closes the window */
         printf("to here\n");
         float t = 0;
+        char dex = 32;
+        char input[2];
+        input[1] = 0;
+        float step = 40*3.14;
         while (!glfwWindowShouldClose(window))
         
         {
             /* Render here */
-            glClearColor(0.0f, 0.5f, 0.0f, 0.0f);
+            glClearColor(0.2f, 0.2f, 0.6f, 0.0f);
             glClearDepth(1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            word.draw(program);
+            word->draw(program);
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -125,9 +129,18 @@ int main(int arg_co, char** args){
             /* Poll for and process events */
             glfwPollEvents();
             t++;
-            float x = 0.5 * sin(t*0.01);
-            float y = 0.5 * cos(t*0.01);
-            word.setOrigin(x,y);
+            float x = 0.5 * sin(t*0.05);
+            float y = 0.5 * cos(t*0.05);
+            if(t>step){
+                t= 0;
+                dex++;
+                if(dex==126) dex=32;
+                delete word;
+                input[0] = dex;
+                word = new Word(input);
+                word->prepareBuffers(program);
+            }
+            word->setOrigin(x,y);
         }
 
 

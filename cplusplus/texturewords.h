@@ -22,12 +22,13 @@ class Word{
     GLuint texCoordinatesBO;
     GLuint indexBufferObject;
     int* indices;
-    float letter_width = 19.25/500.5;
-    float letter_height = 40.0/80.0;
+    float letter_width = 19.25/269.5;
+    float letter_height = 40.0/280.0;
     const int texUnit=0;
     static TGA::image* img;
     static std::string alphabet_filename;
-    GLuint vao, texBufferedObject;
+    static GLuint texBufferedObject;
+    GLuint vao;
     int character_count;
     std::string text;
     float origin_x, origin_y;

@@ -2,6 +2,7 @@
 
 std::string Word::alphabet_filename ="alphabet.tga";
 TGA::image* Word::img = TGA::load_texture(alphabet_filename);
+GLuint Word::texBufferedObject = 0;
 
 /*
 
@@ -58,7 +59,7 @@ Word::Word(std::string t){
         dice[5] = 2+offset;
         
         getLetter(text[i], &ox, &oy);
-        printf("letter: %c at %f, %f\n", text[i], ox, oy);
+
         tex[0] = ox;
         tex[1] = oy;
         
@@ -135,25 +136,26 @@ void Word::prepareBuffers(GLuint &program){
     
     glBindVertexArray(0);
     glUseProgram(0);
-    printf("%d,%d,%d,%d", img->texture[0], img->texture[1], img->texture[2], img->texture[3]);
+
     GLuint pixel_type = img->pixel_depth==32?GL_BGRA:GL_BGR;
-    printf("pixel_depth %d\n",img->pixel_depth);
     /*
      * Set up texture buffer
      **/
     
-    glUseProgram(program);
-    glGenTextures(1, &texBufferedObject);
-    glBindTexture(GL_TEXTURE_2D, texBufferedObject);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, pixel_type, GL_UNSIGNED_BYTE, img->texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    GLuint samplerUniform = glGetUniformLocation(program, "texSampler");
-    glUniform1i(samplerUniform, texUnit);
-    glUseProgram(0);
-
+    if(texBufferedObject==0){
+        printf("buffering texture\n");
+        glUseProgram(program);
+        glGenTextures(1, &texBufferedObject);
+        glBindTexture(GL_TEXTURE_2D, texBufferedObject);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, pixel_type, GL_UNSIGNED_BYTE, img->texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        GLuint samplerUniform = glGetUniformLocation(program, "texSampler");
+        glUniform1i(samplerUniform, texUnit);
+        glUseProgram(0);
+    }
 }
 
 /*
@@ -178,13 +180,15 @@ void Word::draw(GLuint &program){
  Finds the offset of the texture for the current letter.
  */
 void Word::getLetter(char c, float* offsetx, float* offsety){
-    printf("%d ", c);
-    if((c>=65) & (c<91)){
-        *offsetx = (c - 65)*letter_width;
-        *offsety = letter_height;
-    } else if((c>=97) & (c<123)){
-        *offsetx = (c - 97)*letter_width;
-        *offsety = 0;
+    
+    if((c>=32) & (c<126)){
+        int col = (c-32)%14;
+        int row = 6 - (c-32)/14;
+        *offsetx = col*letter_width;
+        *offsety = row*letter_height;
+    } else {
+        *offsetx = 13*letter_width;
+        *offsety = 6*letter_height;
     }
     
 }
@@ -197,6 +201,13 @@ void Word::shutdown(){
     glDeleteBuffers(1, &positionBufferObject);
     glDeleteBuffers(1, &texCoordinatesBO);
     glDeleteBuffers(1, &indexBufferObject);
+    glDeleteVertexArrays(1, &vao);
+    positionBufferObject=0;
+    texCoordinatesBO=0;
+    indexBufferObject=0;
+    programRef=0;
+    vao=0;
+    
     delete[] positions;
     delete[] indices;
     delete[] textureCoordinates;
