@@ -59,7 +59,6 @@ Word::Word(std::string t){
         dice[5] = 2+offset;
         
         getLetter(text[i], &ox, &oy);
-
         tex[0] = ox;
         tex[1] = oy;
         
@@ -156,6 +155,7 @@ void Word::prepareBuffers(GLuint &program){
         glUniform1i(samplerUniform, texUnit);
         glUseProgram(0);
     }
+
 }
 
 /*
@@ -170,7 +170,6 @@ void Word::draw(GLuint &program){
     glDrawElements(GL_TRIANGLES, character_count*6, GL_UNSIGNED_INT, 0);
     
     //glDrawArrays(GL_TRIANGLES, 0, character_count*6);
-    
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
