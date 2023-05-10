@@ -1,7 +1,7 @@
 CC=g++
 INCLUDES=-I$(GLFW3_HOME)/include/
 CFLAGS=-std=c++11 
-LIBS=-L/home/msmith/local/lib/ -lglfw3 -lrt -lXrandr -lXi -lGL -lm -ldl -lXrender -ldrm -lXdamage -lX11-xcb -lxcb-glx -lxcb-dri2 -lXxf86vm -lXfixes -lXext -lX11 -lpthread -lxcb -lXau -lGLEW
+LIBS=-L$(GLFW3_HOME)/lib64/ -lglfw3 -lrt -lXrandr -lXi -lGL -lm -ldl -lXrender -lXdamage -lX11-xcb -lxcb-glx -lxcb-dri2 -lXfixes -lXext -lX11 -lpthread -lxcb -lXau -lGLEW
 cmd_line: main.o tga_reader.o minimum_texture2d.o word_texture.o texturewords.o
 	$(CC) main.o tga_reader.o -o tga_term_check
 	$(CC) minimum_texture2d.o tga_reader.o $(LIBS) -o min_texture
